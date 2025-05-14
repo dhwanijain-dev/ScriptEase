@@ -26,6 +26,29 @@ import { Mic, Stop, Edit, Download, Print as PrintIcon } from '@mui/icons-materi
 import { usePrescriptionStore } from '../store/prescriptionStore'
 import PrescriptionTemplate from '../components/PrescriptionTemplate'
 import { generatePrescriptionPDF } from '../utils/pdfGenerator'
+import { Link } from 'react-router-dom'
+
+const PatientInfoDisplay = () => {
+
+  const { name, age } = usePrescriptionStore((state) => state.patientInfo)
+
+  return (
+    <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Patient Information
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Typography variant="subtitle1">Name: {name}</Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography variant="subtitle1">Age: {age}</Typography>
+        </Grid>
+      </Grid>
+    </Paper>
+  )
+}
+
 
 const PrescriptionPage = () => {
   const {
@@ -43,6 +66,7 @@ const PrescriptionPage = () => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const prescriptionRef = useRef<HTMLDivElement>(null)
+
 
   const handleClosePreview = () => {
     setShowPreview(false)
@@ -145,20 +169,7 @@ const PrescriptionPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Patient Information
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Typography variant="subtitle1">Name: {patientInfo.name}</Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <Typography variant="subtitle1">Age: {patientInfo.age}</Typography>
-          </Grid>
-        </Grid>
-      </Paper>
-
+      <PatientInfoDisplay />
       <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h4" gutterBottom>
           Voice Prescription

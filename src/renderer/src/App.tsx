@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import PrescriptionPage from './pages/PrescriptionPage'
+import Form from './components/Form'
 
 const theme = createTheme({
   palette: {
@@ -24,6 +25,8 @@ function App(): JSX.Element {
       <Router>
         <Routes>
           <Route path="/" element={<PrescriptionPage />} />
+          <Route path="/form" element={<Form />} />
+
         </Routes>
       </Router>
     </ThemeProvider>
