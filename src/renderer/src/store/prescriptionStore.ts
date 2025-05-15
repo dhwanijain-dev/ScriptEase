@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-
+let mediaRecorder: MediaRecorder | null = null
+let audioChunks: Blob[] = []
 interface PatientInfo {
   name: string
   age: number
@@ -65,37 +66,63 @@ export const usePrescriptionStore = create<PrescriptionState>((set) => ({
   setIsRecording: (isRecording) => set({ isRecording }),
   setIsProcessing: (isProcessing) => set({ isProcessing }),
 
-  startRecording: () => {
+  startRecording: async () => {
     set({ isRecording: true })
-    // Backend integration: Start voice recording
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder = new MediaRecorder(stream)
+    audioChunks = []
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        audioChunks.push(event.data)
+      }
+    }
+
+    mediaRecorder.start()
   },
 
-  stopRecording: () => {
+  stopRecording: async () => {
     set({ isRecording: false, isProcessing: true })
-    // Backend integration: Stop recording and process voice
-    // Simulating API call with the new data format
-    setTimeout(() => {
-      set({
-        prescriptionData: {
-          medicines: [
-            {
-              name: 'Paracetamol',
-              dosage: '500mg',
-              duration: '3 times a day for 5 days'
+  
+    return new Promise<void>((resolve) => {
+      if (!mediaRecorder) return
+  
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+        const formData = new FormData()
+        formData.append('audio', audioBlob, 'voice-recording.webm')
+  
+        try {
+          const res = await fetch('http://127.0.0.1:5000/audio', {
+            method: 'POST',
+            body: formData,
+          })
+  
+          if (!res.ok) {
+            throw new Error(`Server responded with status ${res.status}`)
+          }
+  
+          const data = await res.json()
+  
+          set({
+            prescriptionData: {
+              medicines: data.medicines,
+              advice: data.advice,
             },
-            {
-              name: 'Amoxicillin',
-              dosage: '250mg',
-              duration: '2 times a day for 7 days'
-            }
-          ],
-          advice: 'Take medicines after meals. Complete the full course of antibiotics.'
-        },
-        isProcessing: false,
-      })
-    }, 2000)
+            isProcessing: false,
+          })
+        } catch (error) {
+          console.error('Error processing audio:', error)
+          set({ isProcessing: false })
+        }
+  
+        resolve()
+      }
+  
+      mediaRecorder?.stop()
+    })
   },
-
   savePrescription: () => {
     // Backend integration: Save prescription
   },

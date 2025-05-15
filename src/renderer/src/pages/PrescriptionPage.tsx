@@ -26,7 +26,6 @@ import { Mic, Stop, Edit, Download, Print as PrintIcon } from '@mui/icons-materi
 import { usePrescriptionStore } from '../store/prescriptionStore'
 import PrescriptionTemplate from '../components/PrescriptionTemplate'
 import { generatePrescriptionPDF } from '../utils/pdfGenerator'
-import { Link } from 'react-router-dom'
 
 const PatientInfoDisplay = () => {
 
