@@ -192,7 +192,7 @@ const PrescriptionPage = () => {
       </Paper>
 
       {/* View Prescription Button */}
-      {prescriptionData.medicines.length > 0 && (
+      {(prescriptionData.medicines.length > 0 || prescriptionData.advice) && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant="outlined"

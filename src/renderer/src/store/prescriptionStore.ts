@@ -86,7 +86,11 @@ export const usePrescriptionStore = create<PrescriptionState>((set) => ({
     set({ isRecording: false, isProcessing: true })
   
     return new Promise<void>((resolve) => {
-      if (!mediaRecorder) return
+      if (!mediaRecorder) {
+        set({ isProcessing: false });
+        resolve();
+        return;
+      }
   
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
@@ -105,15 +109,17 @@ export const usePrescriptionStore = create<PrescriptionState>((set) => ({
   
           const data = await res.json()
   
+          // Check if data contains the expected fields, provide defaults if not
           set({
             prescriptionData: {
-              medicines: data.medicines,
-              advice: data.advice,
+              medicines: Array.isArray(data.medicines) ? data.medicines : [],
+              advice: typeof data.advice === 'string' ? data.advice : '',
             },
             isProcessing: false,
           })
         } catch (error) {
           console.error('Error processing audio:', error)
+          // Keep existing medicines if there's an error, just update processing state
           set({ isProcessing: false })
         }
   
